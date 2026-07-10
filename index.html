@@ -25,7 +25,6 @@
             border-radius: 50%;
             border: 6px solid #f5b041;
             background: conic-gradient(#e74c3c 0deg 90deg, #3498db 90deg 180deg, #2ecc71 180deg 270deg, #9b59b6 270deg 360deg);
-            /* Упростили анимацию торможения */
             transition: transform 4s ease-out; 
         }
         .arrow {
@@ -50,6 +49,10 @@
             border-radius: 25px;
             cursor: pointer;
         }
+        button:disabled {
+            background: #444;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -72,25 +75,17 @@
         const spinBtn = document.getElementById('spin-btn');
 
         spinBtn.addEventListener('click', function() {
-            // Сразу отключаем кнопку, чтобы зафиксировать клик
             spinBtn.disabled = true;
             spinBtn.innerText = "КРУТИТСЯ...";
 
-            // Генерируем фиксированный сильный поворот (выиграет случайный сектор)
+            // Сильное случайное вращение
             const degrees = 2000 + Math.floor(Math.random() * 360);
-            
-            // Вращаем колесо
             wheel.style.transform = "rotate(" + degrees + "deg)";
 
-            // Через 4 секунды показываем результат
+            // Через 4 секунды показываем выигрыш и закрываем окно
             setTimeout(function() {
-                alert("🎉 Выигрыш зафиксирован!");
-                try {
-                    tg.sendData("user_spun_the_wheel");
-                } catch(e) {
-                    console.log("Ошибка отправки данных в бот");
-                }
-                tg.close();
+                alert("🎉 Колесо остановилось! Выигрыш зафиксирован!");
+                tg.close(); // Просто закрываем приложение, не ломая код через sendData
             }, 4000);
         });
     </script>
