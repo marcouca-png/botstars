@@ -4,85 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Звездная Рулетка</title>
-    <!-- Подключаем скрипт Telegram WebApp API -->
     <script src="https://telegram.org"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             background: #121225;
             color: #ffffff;
             text-align: center;
             padding: 20px;
-            margin: 0;
-            overflow: hidden;
-        }
-        h1 {
-            color: #f5b041;
-            font-size: 24px;
-            margin-bottom: 5px;
         }
         .roulette-container {
             position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 40px auto;
+            width: 250px;
+            height: 250px;
+            margin: 30px auto;
         }
-        /* Само колесо рулетки */
         .wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 8px solid #f5b041;
-            box-shadow: 0 0 20px rgba(245, 176, 65, 0.5);
-            /* Делим колесо на 4 сектора с призами */
-            background: conic-gradient(
-                #e74c3c 0deg 90deg, 
-                #3498db 90deg 180deg, 
-                #2ecc71 180deg 270deg, 
-                #9b59b6 270deg 360deg
-            );
-            /* Плавное торможение (анимация займет 4 секунды) */
-            transition: transform 4s cubic-bezier(0.25, 0.1, 0.1, 1); 
+            border: 6px solid #f5b041;
+            background: conic-gradient(#e74c3c 0deg 90deg, #3498db 90deg 180deg, #2ecc71 180deg 270deg, #9b59b6 270deg 360deg);
+            /* Упростили анимацию торможения */
+            transition: transform 4s ease-out; 
         }
-        /* Стрелка-указатель сверху */
         .arrow {
             position: absolute;
-            top: -20px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
-            border-top: 30px solid #ffffff;
-            filter: drop-shadow(0px 4px 5px rgba(0,0,0,0.5));
+            border-top: 25px solid #ffffff;
             z-index: 10;
         }
-        /* Кнопка запуска */
         button {
             padding: 15px 40px;
             font-size: 18px;
             font-weight: bold;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #f5b041, #f39c12);
+            background: #f5b041;
             color: #121225;
             border: none;
-            border-radius: 30px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(245, 176, 65, 0.4);
-        }
-        button:disabled {
-            background: #444;
-            color: #888;
-            box-shadow: none;
-            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
 
     <h1>Звездная Рулетка</h1>
-    <p>Испытай свою удачу!</p>
+    <p>Нажми кнопку ниже!</p>
 
     <div class="roulette-container">
         <div class="arrow"></div>
@@ -92,42 +65,34 @@
     <button id="spin-btn">КРУТИТЬ! 🎰</button>
 
     <script>
-        // Инициализация Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand(); 
 
         const wheel = document.getElementById('wheel');
         const spinBtn = document.getElementById('spin-btn');
 
-        // Переменная, чтобы отслеживать текущий угол поворота
-        let currentRotation = 0;
+        spinBtn.addEventListener('click', function() {
+            // Сразу отключаем кнопку, чтобы зафиксировать клик
+            spinBtn.disabled = true;
+            spinBtn.innerText = "КРУТИТСЯ...";
 
-        spinBtn.addEventListener('click', () => {
-            // Выключаем кнопку, чтобы пользователь не спамил кликами во время кручения
-            spinBtn.disabled = true; 
-
-            // Генерируем случайный угол (минимум 5 полных оборотов (1800 градусов) + случайный сектор)
-            const randomDegrees = Math.floor(Math.random() * 360);
-            currentRotation += 1800 + randomDegrees; 
+            // Генерируем фиксированный сильный поворот (выиграет случайный сектор)
+            const degrees = 2000 + Math.floor(Math.random() * 360);
             
-            // Запускаем вращение через CSS
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
+            // Вращаем колесо
+            wheel.style.transform = "rotate(" + degrees + "deg)";
 
-            // Ждем ровно 4 секунды (пока колесо крутится и плавно останавливается)
-            setTimeout(() => {
-                alert("🎁 Игра окончена! Ваш результат зафиксирован.");
-                
-                // Отправляем секретный сигнал вашему Python-боту, что колесо прокручено
-                tg.sendData("user_spun_the_wheel"); 
-                
-                // Закрываем окно рулетки
+            // Через 4 секунды показываем результат
+            setTimeout(function() {
+                alert("🎉 Выигрыш зафиксирован!");
+                try {
+                    tg.sendData("user_spun_the_wheel");
+                } catch(e) {
+                    console.log("Ошибка отправки данных в бот");
+                }
                 tg.close();
-            }, 4000); 
+            }, 4000);
         });
-    </script>
-</body>
-</html>
-
     </script>
 </body>
 </html>
