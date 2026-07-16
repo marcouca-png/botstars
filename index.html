@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Звездная Рулетка</title>
+    <!-- Правильное подключение библиотеки Telegram -->
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -24,8 +25,10 @@
             height: 100%;
             border-radius: 50%;
             border: 6px solid #f5b041;
+            /* Конический градиент секторов */
             background: conic-gradient(#e74c3c 0deg 90deg, #3498db 90deg 180deg, #2ecc71 180deg 270deg, #9b59b6 270deg 360deg);
-            transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1); /* Плавное замедление */
+            /* Анимация вращения через CSS-транзишн */
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
             transform: rotate(0deg);
         }
         .arrow {
@@ -49,12 +52,10 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
-            transition: background 0.2s;
         }
         button:disabled {
             background: #444;
             color: #888;
-            cursor: not-allowed;
         }
     </style>
 </head>
@@ -70,33 +71,43 @@
     <button id="spin-btn">КРУТИТЬ! 🎰</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // Инициализируем Telegram WebApp
+        let tg = null;
+        if (window.Telegram && window.Telegram.WebApp) {
+            tg = window.Telegram.WebApp;
+            tg.ready(); // Сообщаем Telegram, что приложение готово
+            tg.expand(); // Разворачиваем на весь экран
+        }
 
         const wheel = document.getElementById('wheel');
         const spinBtn = document.getElementById('spin-btn');
-        
-        // Переменная для накопления общего градуса вращения
         let currentRotation = 0;
 
         spinBtn.addEventListener('click', function() {
+            // Отключаем кнопку, чтобы избежать повторных спам-кликов
             spinBtn.disabled = true;
             spinBtn.innerText = "КРУТИТСЯ...";
 
-            // 1. Делаем от 5 до 8 полных оборотов (1800-2880 градусов) + случайный остаток
-            const extraDegrees = Math.floor(Math.random() * 360);
-            const totalSpins = (5 + Math.floor(Math.random() * 4)) * 360; 
-            
-            // 2. Прибавляем к текущему положению, чтобы колесо всегда крутилось ВПЕРЕД
-            currentRotation += totalSpins + extraDegrees;
-            
-            // 3. Запускаем анимацию вращения
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
+            // Рассчитываем случайный угол (минимум 5 полных оборотов + случайный сектор)
+            const randomDegrees = Math.floor(Math.random() * 360);
+            const extraSpins = 5 * 360; 
+            currentRotation += extraSpins + randomDegrees;
 
-            // Через 4 секунды (когда анимация завершится)
+            // Запускаем вращение колеса
+            wheel.style.transform = "rotate(" + currentRotation + "deg)";
+
+            // Через 4 секунды (когда анимация закончится)
             setTimeout(function() {
                 alert("🎉 Колесо остановилось! Выигрыш зафиксирован!");
-                tg.close(); 
+                
+                // Проверяем, запущено ли в ТГ, и закрываем
+                if (tg) {
+                    tg.close();
+                } else {
+                    // Если тестируете в обычном браузере — просто вернем кнопку в рабочее состояние
+                    spinBtn.disabled = false;
+                    spinBtn.innerText = "КРУТИТЬ! 🎰";
+                }
             }, 4000);
         });
     </script>
