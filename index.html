@@ -25,7 +25,8 @@
             border-radius: 50%;
             border: 6px solid #f5b041;
             background: conic-gradient(#e74c3c 0deg 90deg, #3498db 90deg 180deg, #2ecc71 180deg 270deg, #9b59b6 270deg 360deg);
-            transition: transform 4s ease-out; 
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.3, 1); /* Плавное замедление */
+            transform: rotate(0deg);
         }
         .arrow {
             position: absolute;
@@ -48,15 +49,16 @@
             border: none;
             border-radius: 25px;
             cursor: pointer;
+            transition: background 0.2s;
         }
         button:disabled {
             background: #444;
             color: #888;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
-
     <h1>Звездная Рулетка</h1>
     <p>Нажми кнопку ниже!</p>
 
@@ -69,23 +71,32 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
+        tg.expand();
 
         const wheel = document.getElementById('wheel');
         const spinBtn = document.getElementById('spin-btn');
+        
+        // Переменная для накопления общего градуса вращения
+        let currentRotation = 0;
 
         spinBtn.addEventListener('click', function() {
             spinBtn.disabled = true;
             spinBtn.innerText = "КРУТИТСЯ...";
 
-            // Сильное случайное вращение
-            const degrees = 2000 + Math.floor(Math.random() * 360);
-            wheel.style.transform = "rotate(" + degrees + "deg)";
+            // 1. Делаем от 5 до 8 полных оборотов (1800-2880 градусов) + случайный остаток
+            const extraDegrees = Math.floor(Math.random() * 360);
+            const totalSpins = (5 + Math.floor(Math.random() * 4)) * 360; 
+            
+            // 2. Прибавляем к текущему положению, чтобы колесо всегда крутилось ВПЕРЕД
+            currentRotation += totalSpins + extraDegrees;
+            
+            // 3. Запускаем анимацию вращения
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Через 4 секунды показываем выигрыш и закрываем окно
+            // Через 4 секунды (когда анимация завершится)
             setTimeout(function() {
                 alert("🎉 Колесо остановилось! Выигрыш зафиксирован!");
-                tg.close(); // Просто закрываем приложение, не ломая код через sendData
+                tg.close(); 
             }, 4000);
         });
     </script>
